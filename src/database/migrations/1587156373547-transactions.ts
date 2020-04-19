@@ -11,6 +11,7 @@ export default class transactions1587156373547 implements MigrationInterface {
             type: 'uuid',
             isPrimary: true,
             generationStrategy: 'uuid',
+            default: 'uuid_generate_v4()',
           },
           {
             name: 'title',
@@ -27,6 +28,7 @@ export default class transactions1587156373547 implements MigrationInterface {
           {
             name: 'category_id',
             type: 'uuid',
+            isNullable: true,
           },
           {
             name: 'created_at',

@@ -1,6 +1,6 @@
 import { getRepository, getCustomRepository } from 'typeorm';
 
-// import AppError from '../errors/AppError';
+import AppError from '../errors/AppError';
 
 import TransactionsRepository from '../repositories/TransactionsRepository';
 import Transaction from '../models/Transaction';
@@ -23,12 +23,22 @@ class CreateTransactionService {
     const transactionsRepository = getCustomRepository(TransactionsRepository);
     const categoryRepository = getRepository(Category);
 
-    const categoryData = await categoryRepository.findOne({
+    const { total } = await transactionsRepository.getBalance();
+
+    if (type === 'outcome' && total < value) {
+      throw new AppError("You don't have enouth balance.");
+    }
+
+    let categoryData = await categoryRepository.findOne({
       where: { title: category },
     });
 
     if (!categoryData) {
-      throw Error('não tem categoria');
+      categoryData = categoryRepository.create({
+        title: category,
+      });
+
+      await categoryRepository.save(categoryData);
     }
 
     const transaction = transactionsRepository.create({
@@ -37,6 +47,8 @@ class CreateTransactionService {
       type,
       category_id: categoryData.id,
     });
+
+    await transactionsRepository.save(transaction);
 
     return transaction;
   }
